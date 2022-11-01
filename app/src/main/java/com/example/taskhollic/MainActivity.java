@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
         }
     }
 
-    public void setViews(String state){
+    private void setViews(String state){
         switch (state){
             case "Add/Edit":
                 etTaskName = findViewById(R.id.etTaskName);
@@ -74,14 +74,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
     }
 
     // Sava as alterações feitas no objeto no array principal
-    public void saveChanges(boolean isNew, int index) {
+    private void saveChanges(boolean isNew, int index) {
         ApplicationClass.TaskList.get(index).setName(etTaskName.getText().toString().trim());
         ApplicationClass.TaskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
         ApplicationClass.TaskList.get(index).setImportant(sImportant.isChecked());
     }
 
     // Sava o novo objeto no array principal caso
-    public int saveChanges(boolean isNew) {
+    private int saveChanges(boolean isNew) {
         ApplicationClass.TaskList.add(new TaskClass(etTaskName.getText().toString().trim(),
                 emtTaskDescription.getText().toString().trim(), sImportant.isChecked()));
 
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
     }
 
     // Chama a tela de edição e resgata os dados do objeto a ser editado
-    public void editTask() {
+    private void editTask() {
         int index = ApplicationClass.lastIndex;
         fragmentSwitch("Add/Edit");
 
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
     }
 
     //Seta todos os onClickListeners dos botões
-    public void setButtons() {
+    private void setButtons() {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
     }
 
     //Realiza transações e adiciona elas ao BackStack, seta botões e views
-    public void fragmentSwitch(String state){
+    private void fragmentSwitch(String state){
         switch (state){
             case "Add/Edit":
                 fragmentManager.beginTransaction()
@@ -249,5 +249,4 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                 break;
         }
     }
-
 }
