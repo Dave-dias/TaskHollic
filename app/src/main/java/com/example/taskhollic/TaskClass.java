@@ -25,6 +25,9 @@ public class TaskClass {
     }
 
     public String getDescription() {
+        if (Description.isEmpty()){
+            this.Description = "(No description)";
+        }
         return Description;
     }
 

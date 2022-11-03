@@ -40,25 +40,25 @@ public class TaskFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
         // Passando MainActivity para ser usada como interface no adaptador
-        myAdapter = new MyAdapter(this.getActivity(), ApplicationClass.TaskList);
+        myAdapter = new MyAdapter(this.getActivity(), ApplicationClass.taskList);
         recyclerView.setAdapter(myAdapter);
     }
 
     //Atualiza o item modificado da possiçãorecebida
     public static void reloadList (int index){
-        myAdapter.setArray(ApplicationClass.TaskList);
+        myAdapter.setArray(ApplicationClass.taskList);
         myAdapter.notifyItemChanged(index);
     }
 
     //Adiciona umanova tarefa a lista
     public static void addTask (int index){
-        myAdapter.setArray(ApplicationClass.TaskList);
+        myAdapter.setArray(ApplicationClass.taskList);
         myAdapter.notifyItemInserted(index);
     }
 
     //Deleta tarefa da lista
     public static void DeleteTasks(int index){
-        myAdapter.setArray(ApplicationClass.TaskList);
+        myAdapter.setArray(ApplicationClass.taskList);
         //.notifyItemRemoved() seria mais especifico mas não funcionou como esperado
         myAdapter.notifyDataSetChanged();
     }

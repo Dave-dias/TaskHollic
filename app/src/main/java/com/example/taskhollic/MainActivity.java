@@ -5,13 +5,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
-import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity implements TaskHandler{
     FragmentManager fragmentManager;
@@ -37,6 +40,26 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
 
         setButtons();
         fragmentSwitch("List");
+    }
+
+    @Override
+    protected void onStop() {
+        // Salva os dados da lista num arquivo interno ao pausar atividade
+        try {
+            FileOutputStream file = openFileOutput("Data.txt", MODE_PRIVATE);
+            OutputStreamWriter outputFile = new OutputStreamWriter(file);
+
+            for (TaskClass task: ApplicationClass.taskList){
+                outputFile.write(task.getName() + "," + task.getDescription() + "," + task.getImportant() + "\n");
+            }
+
+            outputFile.flush();
+            outputFile.close();
+        } catch (IOException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+        super.onStop();
     }
 
     @Override
@@ -75,17 +98,17 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
 
     // Sava as alterações feitas no objeto no array principal
     public void saveChanges(boolean isNew, int index) {
-        ApplicationClass.TaskList.get(index).setName(etTaskName.getText().toString().trim());
-        ApplicationClass.TaskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
-        ApplicationClass.TaskList.get(index).setImportant(sImportant.isChecked());
+        ApplicationClass.taskList.get(index).setName(etTaskName.getText().toString().trim());
+        ApplicationClass.taskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
+        ApplicationClass.taskList.get(index).setImportant(sImportant.isChecked());
     }
 
     // Sava o novo objeto no array principal caso
     public int saveChanges(boolean isNew) {
-        ApplicationClass.TaskList.add(new TaskClass(etTaskName.getText().toString().trim(),
+        ApplicationClass.taskList.add(new TaskClass(etTaskName.getText().toString().trim(),
                 emtTaskDescription.getText().toString().trim(), sImportant.isChecked()));
 
-        return (ApplicationClass.TaskList.size()-1);
+        return (ApplicationClass.taskList.size()-1);
     }
 
     //Chama o metodo de troca de fragmentos e resgata os dados para a tela
@@ -98,15 +121,15 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
 
     // Resgata os dados para a tela de display
     private void retrieveTask(int index){
-        tvNameInfo.setText(ApplicationClass.TaskList.get(index).getName());
+        tvNameInfo.setText(ApplicationClass.taskList.get(index).getName());
 
-        if (ApplicationClass.TaskList.get(index).getDescription().equals("")) {
+        if (ApplicationClass.taskList.get(index).getDescription().equals("")) {
             tvDescriptionInfo.setText("(No description found)");
         } else {
-            tvDescriptionInfo.setText(ApplicationClass.TaskList.get(index).getDescription());
+            tvDescriptionInfo.setText(ApplicationClass.taskList.get(index).getDescription());
         }
 
-        if (ApplicationClass.TaskList.get(index).getImportant()) {
+        if (ApplicationClass.taskList.get(index).getImportant()) {
             tvDisplayPriority.setText("Important");
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.red_important));
         } else {
@@ -117,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
 
     @Override
     public void deleteTask(int index) {
-        ApplicationClass.TaskList.remove(index);
+        ApplicationClass.taskList.remove(index);
         TaskFragment.DeleteTasks(index);
     }
 
@@ -126,14 +149,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
         int index = ApplicationClass.lastIndex;
         fragmentSwitch("Add/Edit");
 
-        etTaskName.setText(ApplicationClass.TaskList.get(index).getName());
+        etTaskName.setText(ApplicationClass.taskList.get(index).getName());
         tvIndex.setText(Integer.toString(index));
 
-        if (!ApplicationClass.TaskList.get(index).getDescription().equals("")) {
-            emtTaskDescription.setText(ApplicationClass.TaskList.get(index).getDescription());
+        if (!ApplicationClass.taskList.get(index).getDescription().equals("")) {
+            emtTaskDescription.setText(ApplicationClass.taskList.get(index).getDescription());
         }
 
-        if(ApplicationClass.TaskList.get(index).getImportant()){
+        if(ApplicationClass.taskList.get(index).getImportant()){
             sImportant.setChecked(true);
         } else {
             sImportant.setChecked(false);
@@ -249,5 +272,4 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                 break;
         }
     }
-
 }
