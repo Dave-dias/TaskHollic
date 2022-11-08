@@ -11,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 public class TaskFragment extends Fragment {
+    ButtonInterface buttonInterface;
+    FloatingActionButton fbtnNew;
     static MyAdapter myAdapter;
     RecyclerView recyclerView;
     View view;
@@ -42,6 +46,17 @@ public class TaskFragment extends Fragment {
         // Passando MainActivity para ser usada como interface no adaptador
         myAdapter = new MyAdapter(this.getActivity(), ApplicationClass.taskList);
         recyclerView.setAdapter(myAdapter);
+
+        //Seta o listener do botao
+        buttonInterface = (ButtonInterface) this.getActivity();
+        fbtnNew = view.findViewById(R.id.fbtnNew);
+
+        fbtnNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonInterface.onNewClick();
+            }
+        });
     }
 
     //Atualiza o item modificado da possiçãorecebida

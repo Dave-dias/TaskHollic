@@ -17,12 +17,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-public class MainActivity extends AppCompatActivity implements TaskHandler{
+public class MainActivity extends AppCompatActivity implements TaskHandler, ButtonInterface{
     FragmentManager fragmentManager;
     Fragment taskFragment, addTaskFragment, displayTaskFragment;
     TextView tvNameInfo, tvDescriptionInfo, tvDisplayPriority, tvIndex;
     EditText emtTaskDescription, etTaskName;
-    Button btnAdd, btnSave, btnEdit;
     Switch sImportant;
 
     @Override
@@ -35,11 +34,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
         addTaskFragment = new AddTaskFragment();
         displayTaskFragment = new DisplayTaskFragment();
 
-        btnAdd = findViewById(R.id.btnAdd);
-        btnEdit = findViewById(R.id.btnEdit);
-        btnSave =findViewById(R.id.btnSave);
-
-        setButtons();
         fragmentSwitch("List");
     }
 
@@ -66,19 +60,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
-        //Verifica, seta os botoes para fragmento que vai ser exibido
+        // Retorna a um estado de fragmento especifico dependendo fragmento
         Fragment fragment = fragmentManager.getFragments().get(0);
         if(fragment == displayTaskFragment){
             fragmentManager.popBackStack("Display", 0);
-            setViews("Display");
             retrieveTask(ApplicationClass.lastIndex);
-            buttonPattern("Display");
+            setViews("Display");
         } else if (fragment == taskFragment){
             fragmentManager.popBackStack("List",0);
-            buttonPattern("List");
-        } else if(fragment == addTaskFragment){
-            buttonPattern("Add/Edit");
         }
     }
 
@@ -95,6 +84,33 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                 tvDescriptionInfo = findViewById(R.id.tvDescriptionInfo);
                 tvDisplayPriority = findViewById(R.id.tvDisplayPriority);
         }
+    }
+
+    @Override
+    public void onNewClick() {
+        fragmentSwitch("Add/Edit");
+        cleanAddEditFragment();
+    }
+
+    @Override
+    public void onSaveClick() {
+        if (etTaskName.getText().length() > 0) {
+            //tvIndex exibe o index do objeto ou a palavra "new" caso este seja novo
+            if (tvIndex.getText().equals("New")) {
+                TaskFragment.addTask(saveChanges(true));
+            } else {
+                saveChanges(false, Integer.parseInt(tvIndex.getText().toString()));
+                TaskFragment.reloadList(Integer.parseInt(tvIndex.getText().toString()));
+            }
+            fragmentManager.popBackStack("List", 0);
+        } else {
+            Toast.makeText(getApplicationContext(),"You need to give yout task a name!" , Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onEditClick() {
+        editTask();
     }
 
     // Sava as alterações feitas no objeto no array principal
@@ -145,6 +161,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
         TaskFragment.DeleteTasks(index);
     }
 
+    //"Limpa" a tela de edição para a criação de uma nova tarefa
+    private void cleanAddEditFragment() {
+        etTaskName.setText("");
+        emtTaskDescription.setText("");
+        tvIndex.setText("New");
+        sImportant.setChecked(false);
+    }
+
     // Chama a tela de edição e resgata os dados do objeto a ser editado
     public void editTask() {
         int index = ApplicationClass.lastIndex;
@@ -164,45 +188,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
         }
     }
 
-    //Seta todos os onClickListeners dos botões
-    public void setButtons() {
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (etTaskName.getText().length() > 0) {
-
-                    //tvIndex exibe o index do objeto ou a palavra "new" caso este seja novo
-                    if (tvIndex.getText().equals("New")) {
-                        TaskFragment.addTask(saveChanges(true));
-                    } else {
-                        saveChanges(false, Integer.parseInt(tvIndex.getText().toString()));
-                        TaskFragment.reloadList(Integer.parseInt(tvIndex.getText().toString()));
-                    }
-                    fragmentManager.popBackStack("List", 0);
-                    buttonPattern("List");
-
-                } else {
-                    Toast.makeText(getApplicationContext(),"You need to give yout task a name!" , Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fragmentSwitch("Add/Edit");
-                cleanAddEditFragment();
-            }
-        });
-
-        btnEdit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editTask();
-                }
-        });
-    }
-
     //Realiza transações e adiciona elas ao BackStack, seta botões e views
     public void fragmentSwitch(String state){
         switch (state){
@@ -214,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                         .commit();
                 fragmentManager.executePendingTransactions();
 
-                buttonPattern("Add/Edit");
                 setViews("Add/Edit");
                 break;
 
@@ -226,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                         .commit();
                 fragmentManager.executePendingTransactions();
 
-                buttonPattern("List");
                 break;
 
             case "Display":
@@ -237,39 +220,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler{
                         .commit();
                 fragmentManager.executePendingTransactions();
 
-                buttonPattern("Display");
                 setViews("Display");
-                break;
-        }
-    }
-
-    //"Limpa" a tela de edição para a criação de uma nova tarefa
-    private void cleanAddEditFragment() {
-        etTaskName.setText("");
-        emtTaskDescription.setText("");
-        tvIndex.setText("New");
-        sImportant.setChecked(false);
-    }
-
-    //Metodo para ativar e desativar botões em certos padrões
-    private void buttonPattern(String state){
-        switch (state){
-            case "Add/Edit":
-                btnAdd.setEnabled(false);
-                btnEdit.setEnabled(false);
-                btnSave.setEnabled(true);
-                break;
-
-            case "List":
-                btnAdd.setEnabled(true);
-                btnEdit.setEnabled(false);
-                btnSave.setEnabled(false);
-                break;
-
-            case "Display":
-                btnAdd.setEnabled(false);
-                btnEdit.setEnabled(true);
-                btnSave.setEnabled(false);
                 break;
         }
     }
