@@ -63,19 +63,19 @@ public class TaskFragment extends Fragment {
 
     //Atualiza o item modificado da possiçãorecebida
     public static void reloadList (int index){
-        myAdapter.refreshArray();
+        myAdapter.refreshTaskList();
         myAdapter.notifyItemChanged(index);
     }
 
-    //Adiciona umanova tarefa a lista
+    //Adiciona uma nova tarefa a lista
     public static void addTask (int index){
-        myAdapter.refreshArray();
+        myAdapter.refreshTaskList();
         myAdapter.notifyItemInserted(index);
     }
 
     //Deleta tarefa da lista
-    public static void DeleteTasks(int index){
-        myAdapter.refreshArray();
+    public static void DeleteTasks(){
+        myAdapter.refreshTaskList();
         //.notifyItemRemoved() seria mais especifico mas não funcionou como esperado
         myAdapter.notifyDataSetChanged();
     }

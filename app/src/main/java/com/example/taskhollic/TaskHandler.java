@@ -6,6 +6,6 @@ public interface TaskHandler {
     public ArrayList<TaskClass> getTaskList();
     public void updateTask (TaskClass task);
     void displayTask(int index);
-    void deleteTask(TaskClass task);
-
+    void deleteTask(int id);
+    int getRowCount();
 }

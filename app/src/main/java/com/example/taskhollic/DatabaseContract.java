@@ -53,18 +53,18 @@ public class DatabaseContract {
         }
     }
 
-    public DatabaseContract Open() {
+    public DatabaseContract open() {
         DBHelper = new DBHelper(ourContext);
         ourWritableDataBase = DBHelper.getWritableDatabase();
         ourReadableDataBase = DBHelper.getReadableDatabase();
         return this;
     }
 
-    public void Close() {
+    public void close() {
         DBHelper.close();
     }
 
-    public void AddNewTask(TaskClass task) {
+    public void addNewTask(TaskClass task) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaskEntry.COLUMN_NAME, task.getName());
         contentValues.put(TaskEntry.COlUMN_DESCRIPTION, task.getDescription());
@@ -73,12 +73,12 @@ public class DatabaseContract {
         ourWritableDataBase.insert(DATABASE_TABLE, null, contentValues);
     }
 
-    public void DeleteTask(TaskClass task) {
+    public void deleteTask(int id) {
         ourWritableDataBase.delete(DATABASE_TABLE, TaskEntry.COLUMN_ID + "=?"
-                , new String[]{String.valueOf(task.getId())});
+                , new String[]{String.valueOf(id)});
     }
 
-    public void UpdateTask(TaskClass task) {
+    public void updateTask(TaskClass task) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TaskEntry.COLUMN_NAME, task.getName());
         contentValues.put(TaskEntry.COlUMN_DESCRIPTION, task.getDescription());
@@ -88,7 +88,8 @@ public class DatabaseContract {
                 ,TaskEntry.COLUMN_ID + "=?", new String[]{String.valueOf(task.getId())});
     }
 
-    public ArrayList<TaskClass> GetTaskList() {
+    // Retorna as tarefas da tabela em forma de array
+    public ArrayList<TaskClass> getTaskList() {
         ArrayList<TaskClass> taskList = new ArrayList<>();
         String[] columns = {
                 TaskEntry.COLUMN_ID,
@@ -115,6 +116,7 @@ public class DatabaseContract {
         return taskList;
     }
 
+    // Retorna numero de linhas na tabela
     public int getRowCount(){
         return (int) DatabaseUtils.queryNumEntries(ourReadableDataBase, DATABASE_TABLE);
     }

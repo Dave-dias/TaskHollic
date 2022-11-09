@@ -1,23 +1,16 @@
 package com.example.taskhollic;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements TaskHandler, ButtonInterface{
@@ -35,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Puxa os dados do banco de dados
         taskList = getTaskList();
 
         fragmentManager = getSupportFragmentManager();
@@ -108,23 +102,25 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         taskList.get(index).setImportant(sImportant.isChecked());
         try {
             DatabaseContract db = new DatabaseContract(this);
-            db.Open();
+            db.open();
             updateTask(taskList.get(index));
-            db.Close();
+            db.close();
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        taskList = getTaskList();
     }
 
     // Sava o novo objeto no array principal caso
     public int saveChanges(boolean isNew) {
         try {
             DatabaseContract db = new DatabaseContract(this);
-            db.Open();
+            db.open();
             TaskClass task = new TaskClass(db.getRowCount()-1, etTaskName.getText().toString().trim(),
                     emtTaskDescription.getText().toString().trim(), sImportant.isChecked());
-            db.AddNewTask(task);
-            db.Close();
+            db.addNewTask(task);
+            db.close();
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -133,7 +129,8 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         return (taskList.size()-1);
     }
 
-    // Chama o metodo de troca de fragmentos e resgata os dados para a tela
+    // Chama o metodo de troca de fragmentos, resgata os dados para a tela
+    // e seta o index para uso posterior
     @Override
     public void displayTask(int index) {
         lastIndex = index;
@@ -161,16 +158,31 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     }
 
     @Override
-    public void deleteTask(TaskClass task) {
+    public void deleteTask(int id) {
         try {
             DatabaseContract db = new DatabaseContract(this);
-            db.Open();
-            db.DeleteTask(task);
-            TaskFragment.DeleteTasks(task.getId());
-            db.Close();
+            db.open();
+            db.deleteTask(id);
+            TaskFragment.DeleteTasks();
+            db.close();
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Retorna o numero de entradas no banco
+    @Override
+    public int getRowCount() {
+        int rowCount = 0;
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.open();
+            rowCount = db.getRowCount();
+            db.close();
+        }catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return rowCount;
     }
 
     //"Limpa" a tela de edição para a criação de uma nova tarefa
@@ -239,9 +251,9 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     public ArrayList<TaskClass> getTaskList(){
         try {
             DatabaseContract db = new DatabaseContract(this);
-            db.Open();
-            ArrayList<TaskClass> taskList = db.GetTaskList();
-            db.Close();
+            db.open();
+            ArrayList<TaskClass> taskList = db.getTaskList();
+            db.close();
             return taskList;
         } catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -255,9 +267,9 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     public void updateTask (TaskClass task) {
         try {
             DatabaseContract db = new DatabaseContract(this);
-            db.Open();
-            db.UpdateTask(task);
-            db.Close();
+            db.open();
+            db.updateTask(task);
+            db.close();
         } catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }

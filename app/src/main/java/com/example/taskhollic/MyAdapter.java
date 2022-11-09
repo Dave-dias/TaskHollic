@@ -18,11 +18,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     MyAdapter (TaskHandler taskHandler, ArrayList<TaskClass> taskList){
         this.taskHandler = taskHandler;
-        this.taskList = taskList;
+        this.taskList = taskHandler.getTaskList();
     }
 
-    public void refreshArray() {
-       taskList = taskHandler.getTaskList();
+    public void refreshTaskList(){
+        this.taskList = taskHandler.getTaskList();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -46,7 +46,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    taskHandler.deleteTask(taskList.get(getAdapterPosition()));
+                    taskHandler.deleteTask(taskList.get(getAdapterPosition()).getId());
                     return true;
                 }
             });
@@ -86,6 +86,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return taskList.size();
+        return taskHandler.getRowCount();
     }
 }
