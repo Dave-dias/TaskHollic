@@ -4,31 +4,25 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.view.menu.MenuView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.zip.Inflater;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     TaskHandler taskHandler;
+    ArrayList<TaskClass> taskList;
 
-    ArrayList<TaskClass> TaskList;
-
-    MyAdapter (Context context, ArrayList<TaskClass> TaskList){
-        taskHandler = (TaskHandler) context;
-        this.TaskList = TaskList;
+    MyAdapter (TaskHandler taskHandler, ArrayList<TaskClass> taskList){
+        this.taskHandler = taskHandler;
+        this.taskList = taskList;
     }
 
-    public void setArray(ArrayList<TaskClass> TaskList) {
-        this.TaskList = TaskList;
+    public void refreshArray() {
+       taskList = taskHandler.getTaskList();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -52,7 +46,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    taskHandler.deleteTask(getAdapterPosition());
+                    taskHandler.deleteTask(taskList.get(getAdapterPosition()));
                     return true;
                 }
             });
@@ -80,18 +74,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
-        if(TaskList.get(position).getImportant()){
+        if(taskList.get(position).getImportant()){
             holder.getTvPriority().setText("Important task");
             holder.getIvTaskDot().setImageResource(R.drawable.important_task_dot);
         } else {
             holder.getTvPriority().setText("Commum task");
             holder.getIvTaskDot().setImageResource(R.drawable.commum_task_dot);
         }
-        holder.getTvName().setText(TaskList.get(position).getName());
+        holder.getTvName().setText(taskList.get(position).getName());
     }
 
     @Override
     public int getItemCount() {
-        return TaskList.size();
+        return taskList.size();
     }
 }

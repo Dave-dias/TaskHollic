@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class TaskFragment extends Fragment {
+    TaskHandler taskHandler;
     ButtonInterface buttonInterface;
     FloatingActionButton fbtnNew;
     static MyAdapter myAdapter;
@@ -38,13 +39,14 @@ public class TaskFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        taskHandler = (TaskHandler) this.getActivity();
 
         recyclerView = (RecyclerView) view.findViewById(R.id.rvTasks);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
         // Passando MainActivity para ser usada como interface no adaptador
-        myAdapter = new MyAdapter(this.getActivity(), ApplicationClass.taskList);
+        myAdapter = new MyAdapter(taskHandler, taskHandler.getTaskList());
         recyclerView.setAdapter(myAdapter);
 
         //Seta o listener do botao
@@ -61,21 +63,20 @@ public class TaskFragment extends Fragment {
 
     //Atualiza o item modificado da possiçãorecebida
     public static void reloadList (int index){
-        myAdapter.setArray(ApplicationClass.taskList);
+        myAdapter.refreshArray();
         myAdapter.notifyItemChanged(index);
     }
 
     //Adiciona umanova tarefa a lista
     public static void addTask (int index){
-        myAdapter.setArray(ApplicationClass.taskList);
+        myAdapter.refreshArray();
         myAdapter.notifyItemInserted(index);
     }
 
     //Deleta tarefa da lista
     public static void DeleteTasks(int index){
-        myAdapter.setArray(ApplicationClass.taskList);
+        myAdapter.refreshArray();
         //.notifyItemRemoved() seria mais especifico mas não funcionou como esperado
         myAdapter.notifyDataSetChanged();
     }
-
 }

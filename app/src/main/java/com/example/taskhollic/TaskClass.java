@@ -1,16 +1,12 @@
 package com.example.taskhollic;
 
 public class TaskClass {
+    int id;
     String Name, Description;
     Boolean isImportant;
 
-    public TaskClass(String name, Boolean isImportant) {
-        Name = name;
-        Description = "";
-        this.isImportant = isImportant;
-    }
-
-    public TaskClass(String name, String description, Boolean isImportant) {
+    public TaskClass(int id, String name, String description, Boolean isImportant) {
+        this.id = id;
         Name = name;
         Description = description;
         this.isImportant = isImportant;
@@ -43,4 +39,11 @@ public class TaskClass {
         isImportant = important;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

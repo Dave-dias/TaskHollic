@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Intent;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements TaskHandler, ButtonInterface{
     FragmentManager fragmentManager;
@@ -24,10 +27,15 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     EditText emtTaskDescription, etTaskName;
     Switch sImportant;
 
+    ArrayList<TaskClass> taskList;
+    static int lastIndex;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        taskList = getTaskList();
 
         fragmentManager = getSupportFragmentManager();
         taskFragment = new TaskFragment();
@@ -38,34 +46,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     }
 
     @Override
-    protected void onStop() {
-        // Salva os dados da lista num arquivo interno ao pausar atividade
-        try {
-            FileOutputStream file = openFileOutput("Data.txt", MODE_PRIVATE);
-            OutputStreamWriter outputFile = new OutputStreamWriter(file);
-
-            for (TaskClass task: ApplicationClass.taskList){
-                outputFile.write(task.getName() + "," + task.getDescription() + "," + task.getImportant() + "\n");
-            }
-
-            outputFile.flush();
-            outputFile.close();
-        } catch (IOException e){
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-        super.onStop();
-    }
-
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
         // Retorna a um estado de fragmento especifico dependendo fragmento
         Fragment fragment = fragmentManager.getFragments().get(0);
         if(fragment == displayTaskFragment){
             fragmentManager.popBackStack("Display", 0);
-            retrieveTask(ApplicationClass.lastIndex);
             setViews("Display");
+            retrieveTask(lastIndex);
         } else if (fragment == taskFragment){
             fragmentManager.popBackStack("List",0);
         }
@@ -104,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
             }
             fragmentManager.popBackStack("List", 0);
         } else {
-            Toast.makeText(getApplicationContext(),"You need to give yout task a name!" , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"You need to give your task a name!" , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -115,38 +103,55 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     // Sava as alterações feitas no objeto no array principal
     public void saveChanges(boolean isNew, int index) {
-        ApplicationClass.taskList.get(index).setName(etTaskName.getText().toString().trim());
-        ApplicationClass.taskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
-        ApplicationClass.taskList.get(index).setImportant(sImportant.isChecked());
+        taskList.get(index).setName(etTaskName.getText().toString().trim());
+        taskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
+        taskList.get(index).setImportant(sImportant.isChecked());
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.Open();
+            updateTask(taskList.get(index));
+            db.Close();
+        }catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Sava o novo objeto no array principal caso
     public int saveChanges(boolean isNew) {
-        ApplicationClass.taskList.add(new TaskClass(etTaskName.getText().toString().trim(),
-                emtTaskDescription.getText().toString().trim(), sImportant.isChecked()));
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.Open();
+            TaskClass task = new TaskClass(db.getRowCount()-1, etTaskName.getText().toString().trim(),
+                    emtTaskDescription.getText().toString().trim(), sImportant.isChecked());
+            db.AddNewTask(task);
+            db.Close();
+        }catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
-        return (ApplicationClass.taskList.size()-1);
+        taskList = getTaskList();
+        return (taskList.size()-1);
     }
 
-    //Chama o metodo de troca de fragmentos e resgata os dados para a tela
+    // Chama o metodo de troca de fragmentos e resgata os dados para a tela
     @Override
     public void displayTask(int index) {
-        ApplicationClass.lastIndex = index;
+        lastIndex = index;
         fragmentSwitch("Display");
         retrieveTask(index);
     }
 
     // Resgata os dados para a tela de display
     private void retrieveTask(int index){
-        tvNameInfo.setText(ApplicationClass.taskList.get(index).getName());
+        tvNameInfo.setText(taskList.get(index).getName());
 
-        if (ApplicationClass.taskList.get(index).getDescription().equals("")) {
+        if (taskList.get(index).getDescription().equals("")) {
             tvDescriptionInfo.setText("(No description found)");
         } else {
-            tvDescriptionInfo.setText(ApplicationClass.taskList.get(index).getDescription());
+            tvDescriptionInfo.setText(taskList.get(index).getDescription());
         }
 
-        if (ApplicationClass.taskList.get(index).getImportant()) {
+        if (taskList.get(index).getImportant()) {
             tvDisplayPriority.setText("Important");
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.red_important));
         } else {
@@ -156,9 +161,16 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     }
 
     @Override
-    public void deleteTask(int index) {
-        ApplicationClass.taskList.remove(index);
-        TaskFragment.DeleteTasks(index);
+    public void deleteTask(TaskClass task) {
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.Open();
+            db.DeleteTask(task);
+            TaskFragment.DeleteTasks(task.getId());
+            db.Close();
+        }catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     //"Limpa" a tela de edição para a criação de uma nova tarefa
@@ -171,24 +183,24 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     // Chama a tela de edição e resgata os dados do objeto a ser editado
     public void editTask() {
-        int index = ApplicationClass.lastIndex;
+        int index = lastIndex;
         fragmentSwitch("Add/Edit");
 
-        etTaskName.setText(ApplicationClass.taskList.get(index).getName());
+        etTaskName.setText(taskList.get(index).getName());
         tvIndex.setText(Integer.toString(index));
 
-        if (!ApplicationClass.taskList.get(index).getDescription().equals("")) {
-            emtTaskDescription.setText(ApplicationClass.taskList.get(index).getDescription());
+        if (!taskList.get(index).getDescription().equals("")) {
+            emtTaskDescription.setText(taskList.get(index).getDescription());
         }
 
-        if(ApplicationClass.taskList.get(index).getImportant()){
+        if(taskList.get(index).getImportant()){
             sImportant.setChecked(true);
         } else {
             sImportant.setChecked(false);
         }
     }
 
-    //Realiza transações e adiciona elas ao BackStack, seta botões e views
+    //Realiza transações e adiciona elas ao BackStack
     public void fragmentSwitch(String state){
         switch (state){
             case "Add/Edit":
@@ -198,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
                         .addToBackStack("Add/Edit")
                         .commit();
                 fragmentManager.executePendingTransactions();
-
                 setViews("Add/Edit");
                 break;
 
@@ -209,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
                         .addToBackStack("List")
                         .commit();
                 fragmentManager.executePendingTransactions();
-
                 break;
 
             case "Display":
@@ -219,9 +229,37 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
                         .addToBackStack("Display")
                         .commit();
                 fragmentManager.executePendingTransactions();
-
                 setViews("Display");
                 break;
+        }
+    }
+
+    // Puxa as tarefas do banco de dados
+    @Override
+    public ArrayList<TaskClass> getTaskList(){
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.Open();
+            ArrayList<TaskClass> taskList = db.GetTaskList();
+            db.Close();
+            return taskList;
+        } catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+        return taskList = new ArrayList<>();
+    }
+
+    // Da update na tarefa no ID passada pelo parametro
+    @Override
+    public void updateTask (TaskClass task) {
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.Open();
+            db.UpdateTask(task);
+            db.Close();
+        } catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }
