@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     EditText emtTaskDescription, etTaskName;
     Switch sImportant;
 
-    ArrayList<TaskClass> taskList;
-    static int lastIndex;
+    static ArrayList<TaskClass> taskList;
+    static int lastDisplayIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         if(fragment == displayTaskFragment){
             fragmentManager.popBackStack("Display", 0);
             setViews("Display");
-            retrieveTask(lastIndex);
+            retrieveTask(lastDisplayIndex);
         } else if (fragment == taskFragment){
             fragmentManager.popBackStack("List",0);
         }
@@ -108,8 +108,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
-        taskList = getTaskList();
     }
 
     // Sava o novo objeto no array principal caso
@@ -125,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
-        taskList = getTaskList();
         return (taskList.size()-1);
     }
 
@@ -133,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     // e seta o index para uso posterior
     @Override
     public void displayTask(int index) {
-        lastIndex = index;
+        lastDisplayIndex = index;
         fragmentSwitch("Display");
         retrieveTask(index);
     }
@@ -195,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     // Chama a tela de edição e resgata os dados do objeto a ser editado
     public void editTask() {
-        int index = lastIndex;
+        int index = lastDisplayIndex;
         fragmentSwitch("Add/Edit");
 
         etTaskName.setText(taskList.get(index).getName());

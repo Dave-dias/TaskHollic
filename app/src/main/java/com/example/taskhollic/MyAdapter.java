@@ -22,6 +22,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     public void refreshTaskList(){
+        MainActivity.taskList = taskHandler.getTaskList();
         this.taskList = taskHandler.getTaskList();
     }
 
