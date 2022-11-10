@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class TaskFragment extends Fragment {
+public class TaskListFragment extends Fragment {
     TaskHandler taskHandler;
     ButtonInterface buttonInterface;
     FloatingActionButton fbtnNew;
@@ -21,7 +21,7 @@ public class TaskFragment extends Fragment {
     RecyclerView recyclerView;
     View view;
 
-    public TaskFragment (){
+    public TaskListFragment(){
     }
 
     @Override
@@ -32,7 +32,7 @@ public class TaskFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_task, container, false);
+        view = inflater.inflate(R.layout.fragment_task_list, container, false);
         return view;
     }
 
@@ -41,7 +41,7 @@ public class TaskFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         taskHandler = (TaskHandler) this.getActivity();
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.rvTasks);
+        recyclerView = view.findViewById(R.id.rvTasks);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
@@ -53,15 +53,10 @@ public class TaskFragment extends Fragment {
         buttonInterface = (ButtonInterface) this.getActivity();
         fbtnNew = view.findViewById(R.id.fbtnNew);
 
-        fbtnNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                buttonInterface.onNewClick();
-            }
-        });
+        fbtnNew.setOnClickListener(v -> buttonInterface.onNewClick());
     }
 
-    //Atualiza o item modificado da possiçãorecebida
+    //Atualiza o item modificado da possição recebida
     public static void reloadList (int index){
         myAdapter.refreshTaskList();
         myAdapter.notifyItemChanged(index);

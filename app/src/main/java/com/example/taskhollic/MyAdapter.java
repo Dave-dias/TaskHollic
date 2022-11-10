@@ -1,6 +1,5 @@
 package com.example.taskhollic;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     MyAdapter (TaskHandler taskHandler, ArrayList<TaskClass> taskList){
         this.taskHandler = taskHandler;
-        this.taskList = taskHandler.getTaskList();
+        this.taskList = taskList;
     }
 
     public void refreshTaskList(){
@@ -37,19 +36,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             tvName = itemView.findViewById(R.id.tvName);
             ivTaskDot = itemView.findViewById(R.id.ivTaskDot);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    taskHandler.displayTask(getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> taskHandler.displayTask(getAdapterPosition()));
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    taskHandler.deleteTask(taskList.get(getAdapterPosition()).getId());
-                    return true;
-                }
+            itemView.setOnLongClickListener(v -> {
+                taskHandler.deleteTask(taskList.get(getAdapterPosition()).getId());
+                return true;
             });
         }
 
@@ -69,17 +60,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @NonNull
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_card_layout, parent, false);
         return new ViewHolder (view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
         if(taskList.get(position).getImportant()){
-            holder.getTvPriority().setText("Important task");
+            holder.getTvPriority().setText(R.string.important_task);
             holder.getIvTaskDot().setImageResource(R.drawable.important_task_dot);
         } else {
-            holder.getTvPriority().setText("Commum task");
+            holder.getTvPriority().setText(R.string.common_task);
             holder.getIvTaskDot().setImageResource(R.drawable.commum_task_dot);
         }
         holder.getTvName().setText(taskList.get(position).getName());

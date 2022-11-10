@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements TaskHandler, ButtonInterface{
     FragmentManager fragmentManager;
     Fragment taskFragment, addTaskFragment, displayTaskFragment;
-    TextView tvNameInfo, tvDescriptionInfo, tvDisplayPriority, tvIndex;
-    EditText emtTaskDescription, etTaskName;
+    TextView tvDisplayNameInfo, tvDisplayDescriptionInfo, tvDisplayPriority, tvEditIndex;
+    EditText emtEditTaskDescription, etEditTaskName;
     Switch sImportant;
 
     static ArrayList<TaskClass> taskList;
@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         taskList = getTaskList();
 
         fragmentManager = getSupportFragmentManager();
-        taskFragment = new TaskFragment();
-        addTaskFragment = new AddTaskFragment();
+        taskFragment = new TaskListFragment();
+        addTaskFragment = new AddEditTaskFragment();
         displayTaskFragment = new DisplayTaskFragment();
 
         fragmentSwitch("List");
@@ -56,14 +56,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     public void setViews(String state){
         switch (state){
             case "Add/Edit":
-                etTaskName = findViewById(R.id.etTaskName);
-                emtTaskDescription = findViewById(R.id.emtTaskDescription);
+                etEditTaskName = findViewById(R.id.etEditTaskName);
+                emtEditTaskDescription = findViewById(R.id.emtEditTaskDescription);
                 sImportant = findViewById(R.id.sImportant);
-                tvIndex = findViewById(R.id.tvIndex);
+                tvEditIndex = findViewById(R.id.tvEditIndex);
                 break;
             case "Display":
-                tvNameInfo = findViewById(R.id.tvNameInfo);
-                tvDescriptionInfo = findViewById(R.id.tvDescriptionInfo);
+                tvDisplayNameInfo = findViewById(R.id.tvDisplayNameInfo);
+                tvDisplayDescriptionInfo = findViewById(R.id.tvDisplayDescriptionInfo);
                 tvDisplayPriority = findViewById(R.id.tvDisplayPriority);
         }
     }
@@ -76,13 +76,13 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     @Override
     public void onSaveClick() {
-        if (etTaskName.getText().length() > 0) {
+        if (etEditTaskName.getText().length() > 0) {
             //tvIndex exibe o index do objeto ou a palavra "new" caso este seja novo
-            if (tvIndex.getText().equals("New")) {
-                TaskFragment.addTask(saveChanges(true));
+            if (tvEditIndex.getText().equals("New")) {
+                TaskListFragment.addTask(saveChanges());
             } else {
-                saveChanges(false, Integer.parseInt(tvIndex.getText().toString()));
-                TaskFragment.reloadList(Integer.parseInt(tvIndex.getText().toString()));
+                saveChanges(Integer.parseInt(tvEditIndex.getText().toString()));
+                TaskListFragment.reloadList(Integer.parseInt(tvEditIndex.getText().toString()));
             }
             fragmentManager.popBackStack("List", 0);
         } else {
@@ -96,9 +96,9 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     }
 
     // Sava as alterações feitas no objeto no array principal
-    public void saveChanges(boolean isNew, int index) {
-        taskList.get(index).setName(etTaskName.getText().toString().trim());
-        taskList.get(index).setDescription(emtTaskDescription.getText().toString().trim());
+    public void saveChanges( int index) {
+        taskList.get(index).setName(etEditTaskName.getText().toString().trim());
+        taskList.get(index).setDescription(emtEditTaskDescription.getText().toString().trim());
         taskList.get(index).setImportant(sImportant.isChecked());
         try {
             DatabaseContract db = new DatabaseContract(this);
@@ -111,12 +111,12 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     }
 
     // Sava o novo objeto no array principal caso
-    public int saveChanges(boolean isNew) {
+    public int saveChanges() {
         try {
             DatabaseContract db = new DatabaseContract(this);
             db.open();
-            TaskClass task = new TaskClass(db.getRowCount()-1, etTaskName.getText().toString().trim(),
-                    emtTaskDescription.getText().toString().trim(), sImportant.isChecked());
+            TaskClass task = new TaskClass(db.getRowCount()-1, etEditTaskName.getText().toString().trim(),
+                    emtEditTaskDescription.getText().toString().trim(), sImportant.isChecked());
             db.addNewTask(task);
             db.close();
         }catch (SQLException e){
@@ -137,19 +137,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     // Resgata os dados para a tela de display
     private void retrieveTask(int index){
-        tvNameInfo.setText(taskList.get(index).getName());
-
-        if (taskList.get(index).getDescription().equals("")) {
-            tvDescriptionInfo.setText("(No description found)");
-        } else {
-            tvDescriptionInfo.setText(taskList.get(index).getDescription());
-        }
+        tvDisplayNameInfo.setText(taskList.get(index).getName());
+        tvDisplayDescriptionInfo.setText(taskList.get(index).getDescription());
 
         if (taskList.get(index).getImportant()) {
             tvDisplayPriority.setText("Important");
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.red_important));
         } else {
-            tvDisplayPriority.setText("Commum");
+            tvDisplayPriority.setText("Common");
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.purple_500));
         }
     }
@@ -160,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
             DatabaseContract db = new DatabaseContract(this);
             db.open();
             db.deleteTask(id);
-            TaskFragment.DeleteTasks();
+            TaskListFragment.DeleteTasks();
             db.close();
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -184,9 +179,9 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
 
     //"Limpa" a tela de edição para a criação de uma nova tarefa
     private void cleanAddEditFragment() {
-        etTaskName.setText("");
-        emtTaskDescription.setText("");
-        tvIndex.setText("New");
+        etEditTaskName.setText("");
+        emtEditTaskDescription.setText("");
+        tvEditIndex.setText("New");
         sImportant.setChecked(false);
     }
 
@@ -195,18 +190,14 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         int index = lastDisplayIndex;
         fragmentSwitch("Add/Edit");
 
-        etTaskName.setText(taskList.get(index).getName());
-        tvIndex.setText(Integer.toString(index));
+        etEditTaskName.setText(taskList.get(index).getName());
+        tvEditIndex.setText(Integer.toString(index));
 
         if (!taskList.get(index).getDescription().equals("")) {
-            emtTaskDescription.setText(taskList.get(index).getDescription());
+            emtEditTaskDescription.setText(taskList.get(index).getDescription());
         }
 
-        if(taskList.get(index).getImportant()){
-            sImportant.setChecked(true);
-        } else {
-            sImportant.setChecked(false);
-        }
+        sImportant.setChecked(taskList.get(index).getImportant());
     }
 
     //Realiza transações e adiciona elas ao BackStack

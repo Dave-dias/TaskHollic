@@ -11,10 +11,10 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
-        android:name="com.example.taskhollic.TaskFragment"
+        android:name="com.example.taskhollic.TaskListFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="9"
-        tools:layout="@layout/fragment_task"></androidx.fragment.app.FragmentContainerView>
+        tools:layout="@layout/fragment_task_list"></androidx.fragment.app.FragmentContainerView>
 
 </LinearLayout>

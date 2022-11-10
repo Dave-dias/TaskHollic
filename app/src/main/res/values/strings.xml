@@ -1,5 +1,18 @@
 <resources>
-    <string name="app_name">TaskHollic</string>
+    <string name="app_name">Taskhollic</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="editing_a_task_intro">Editing a task</string>
+    <string name="index_intro">Index:</string>
+    <string name="new_task">New task</string>
+    <string name="insert_the_name_intro">Insert the name:</string>
+    <string name="name_hint">(You need to put some text here)</string>
+    <string name="insert_the_description_intro">Insert the description:</string>
+    <string name="description_hint">(Insert here the description)</string>
+    <string name="important_task">Important task</string>
+    <string name="save_button_description">Save button</string>
+    <string name="displaying_title">Displaying a task</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="common_task">Common task</string>
 </resources>

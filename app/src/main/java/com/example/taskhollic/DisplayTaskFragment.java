@@ -41,11 +41,6 @@ public class DisplayTaskFragment extends Fragment {
         buttonInterface = (ButtonInterface) this.getActivity();
         fbtnEdit = view.findViewById(R.id.fbtnEdit);
 
-        fbtnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                buttonInterface.onEditClick();
-            }
-        });
+        fbtnEdit.setOnClickListener(v -> buttonInterface.onEditClick());
     }
 }
