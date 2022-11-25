@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 
 public class DatabaseContract {
@@ -84,8 +85,22 @@ public class DatabaseContract {
         contentValues.put(TaskEntry.COlUMN_DESCRIPTION, task.getDescription());
         contentValues.put(TaskEntry.COlUMN_FLAG_IMPORTANT, Boolean.toString(task.getImportant()));
 
-        ourWritableDataBase.update(DATABASE_TABLE, contentValues
-                ,TaskEntry.COLUMN_ID + "=?", new String[]{String.valueOf(task.getId())});
+        ourWritableDataBase.update(DATABASE_TABLE, contentValues,TaskEntry.COLUMN_ID + "=?"
+                , new String[]{String.valueOf(task.getId())});
+    }
+
+    public void swapTasks(TaskClass target, TaskClass moved) {
+        String swapIDs = "UPDATE " + DATABASE_TABLE
+                + " SET " + TaskEntry.COLUMN_ID + " = CASE " + TaskEntry.COLUMN_NAME
+                + " WHEN " + moved.getName() + " THEN " + target.getId()
+                + " WHEN " + target.getName() + " THEN " + moved.getId() + " END "
+                + " WHERE " + TaskEntry.COLUMN_NAME + " in (" + target.getName() + ", "
+                + moved.getName() + ")";
+
+        ourWritableDataBase.execSQL(swapIDs);
+
+        updateTask(target);
+        updateTask(moved);
     }
 
     // Retorna as tarefas da tabela em forma de array

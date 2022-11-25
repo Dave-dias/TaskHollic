@@ -10,8 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements TouchHelperInterface {
     TaskHandler taskHandler;
     ArrayList<TaskClass> taskList;
 
@@ -37,11 +38,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             ivTaskDot = itemView.findViewById(R.id.ivTaskDot);
 
             itemView.setOnClickListener(v -> taskHandler.displayTask(getAdapterPosition()));
-
-            itemView.setOnLongClickListener(v -> {
-                taskHandler.deleteTask(taskList.get(getAdapterPosition()).getId());
-                return true;
-            });
         }
 
         public TextView getTvName() {
@@ -80,4 +76,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public int getItemCount() {
         return taskHandler.getRowCount();
     }
+
+    @Override
+    public void movedTask(int oldPosition, int newPosition) {
+        taskHandler.swapTasks(taskList.get(newPosition), taskList.get(oldPosition));
+
+        Collections.swap(MainActivity.taskList, oldPosition, newPosition);
+        Collections.swap(taskList, oldPosition, newPosition);
+
+        notifyItemMoved(oldPosition, newPosition);
+    }
+
+    @Override
+    public void swipedTask(int Position) {
+        taskHandler.deleteTask(taskList.get(Position).getId());
+    }
+
 }

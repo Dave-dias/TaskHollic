@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
             retrieveTask(lastDisplayIndex);
         } else if (fragment == taskFragment){
             fragmentManager.popBackStack("List",0);
+            TaskListFragment.refreshList();
         }
     }
 
@@ -231,6 +232,19 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
                 fragmentManager.executePendingTransactions();
                 setViews("Display");
                 break;
+        }
+    }
+
+    // Salva as alterações feitas na lista
+    @Override
+    public void swapTasks (TaskClass target, TaskClass moved) {
+        try {
+            DatabaseContract db = new DatabaseContract(this);
+            db.open();
+            db.swapTasks(target, moved);
+            db.close();
+        } catch (SQLException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
