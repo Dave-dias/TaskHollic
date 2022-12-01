@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         try {
             DatabaseContract db = new DatabaseContract(this);
             db.open();
-            TaskClass task = new TaskClass(db.getRowCount()-1, etEditTaskName.getText().toString().trim(),
-                    emtEditTaskDescription.getText().toString().trim(), sImportant.isChecked());
-            db.addNewTask(task);
+            db.addNewTask(etEditTaskName.getText().toString().trim(),
+                    emtEditTaskDescription.getText().toString().trim(),
+                    sImportant.isChecked());
             db.close();
         }catch (SQLException e){
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();

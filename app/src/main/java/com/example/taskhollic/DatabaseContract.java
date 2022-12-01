@@ -40,7 +40,7 @@ public class DatabaseContract {
         @Override
         public void onCreate(SQLiteDatabase db) {
             String SQLCreateTable = "CREATE TABLE " + DATABASE_TABLE
-                    + " ( " + TaskEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + " ( " + TaskEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
                     + TaskEntry.COLUMN_NAME + " TEXT NOT NULL, "
                     + TaskEntry.COlUMN_DESCRIPTION + " TEXT NOT NULl, "
                     + TaskEntry.COlUMN_FLAG_IMPORTANT + " TEXT NOT NULL)";
@@ -65,11 +65,11 @@ public class DatabaseContract {
         DBHelper.close();
     }
 
-    public void addNewTask(TaskClass task) {
+    public void addNewTask(String name, String description, Boolean isImportant) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TaskEntry.COLUMN_NAME, task.getName());
-        contentValues.put(TaskEntry.COlUMN_DESCRIPTION, task.getDescription());
-        contentValues.put(TaskEntry.COlUMN_FLAG_IMPORTANT, Boolean.toString(task.getImportant()));
+        contentValues.put(TaskEntry.COLUMN_NAME, name);
+        contentValues.put(TaskEntry.COlUMN_DESCRIPTION, description);
+        contentValues.put(TaskEntry.COlUMN_FLAG_IMPORTANT, Boolean.toString(isImportant));
 
         ourWritableDataBase.insert(DATABASE_TABLE, null, contentValues);
     }
@@ -89,18 +89,22 @@ public class DatabaseContract {
                 , new String[]{String.valueOf(task.getId())});
     }
 
+    // Troca duas tarefas de lugar no banco de dados pelo metodo de trocar os IDs delas
     public void swapTasks(TaskClass target, TaskClass moved) {
-        String swapIDs = "UPDATE " + DATABASE_TABLE
-                + " SET " + TaskEntry.COLUMN_ID + " = CASE " + TaskEntry.COLUMN_NAME
-                + " WHEN " + moved.getName() + " THEN " + target.getId()
-                + " WHEN " + target.getName() + " THEN " + moved.getId() + " END "
-                + " WHERE " + TaskEntry.COLUMN_NAME + " in (" + target.getName() + ", "
-                + moved.getName() + ")";
+        String swapIDs = "UPDATE " + DATABASE_TABLE +  " SET " + TaskEntry.COLUMN_ID
+                + " = CASE WHEN " + TaskEntry.COLUMN_ID + " = " + moved.getId()
+                + " THEN " + target.getId() * -1 + " WHEN " + TaskEntry.COLUMN_ID
+                + " = " + target.getId() + " THEN " + moved.getId() * -1 + " END "
+                + " WHERE " + TaskEntry.COLUMN_ID + " IN (" + target.getId() + ", "
+                + moved.getId() + ")";
 
         ourWritableDataBase.execSQL(swapIDs);
 
-        updateTask(target);
-        updateTask(moved);
+        swapIDs = "UPDATE " + DATABASE_TABLE + " SET " + TaskEntry.COLUMN_ID
+                + " = -1 * " + TaskEntry.COLUMN_ID  + " WHERE " + TaskEntry.COLUMN_ID
+                + " in (" + target.getId() * -1 + ", " + moved.getId() * -1 + ")";
+
+        ourWritableDataBase.execSQL(swapIDs);
     }
 
     // Retorna as tarefas da tabela em forma de array

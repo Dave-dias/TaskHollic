@@ -80,10 +80,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implem
     @Override
     public void movedTask(int oldPosition, int newPosition) {
         taskHandler.swapTasks(taskList.get(newPosition), taskList.get(oldPosition));
-
         Collections.swap(MainActivity.taskList, oldPosition, newPosition);
-        Collections.swap(taskList, oldPosition, newPosition);
-
         notifyItemMoved(oldPosition, newPosition);
     }
 
