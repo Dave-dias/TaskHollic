@@ -15,4 +15,5 @@
     <string name="name">Name</string>
     <string name="description">Description</string>
     <string name="common_task">Common task</string>
+    <string name="new_string">New</string>
 </resources>

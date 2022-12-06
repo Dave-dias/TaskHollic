@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.annotation.SuppressLint;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     Fragment taskFragment, addTaskFragment, displayTaskFragment;
     TextView tvDisplayNameInfo, tvDisplayDescriptionInfo, tvDisplayPriority, tvEditIndex;
     EditText emtEditTaskDescription, etEditTaskName;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch sImportant;
 
     static ArrayList<TaskClass> taskList;
@@ -142,10 +144,10 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         tvDisplayDescriptionInfo.setText(taskList.get(index).getDescription());
 
         if (taskList.get(index).getImportant()) {
-            tvDisplayPriority.setText("Important");
+            tvDisplayPriority.setText(R.string.important_task);
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.red_important));
         } else {
-            tvDisplayPriority.setText("Common");
+            tvDisplayPriority.setText(R.string.common_task);
             tvDisplayPriority.setTextColor(getResources().getColor(R.color.purple_500));
         }
     }
@@ -182,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
     private void cleanAddEditFragment() {
         etEditTaskName.setText("");
         emtEditTaskDescription.setText("");
-        tvEditIndex.setText("New");
+        tvEditIndex.setText(R.string.new_string);
         sImportant.setChecked(false);
     }
 
@@ -192,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements TaskHandler, Butt
         fragmentSwitch("Add/Edit");
 
         etEditTaskName.setText(taskList.get(index).getName());
-        tvEditIndex.setText(Integer.toString(index));
+        tvEditIndex.setText(String.valueOf(index));
 
         if (!taskList.get(index).getDescription().equals("")) {
             emtEditTaskDescription.setText(taskList.get(index).getDescription());
